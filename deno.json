@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "tauri:dev": "GSK_RENDERER=gl WEBKIT_DISABLE_DMABUF_RENDERER=1 deno run tauri dev"
+  }
+}
+
