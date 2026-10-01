@@ -1,0 +1,19 @@
+.reader-lense {
+	margin: 0 1rem 0 1rem;
+}
+.reader-lense.active p,
+.active li {
+	margin-bottom: 1em;
+	filter: blur(1.4px);
+	color: black;
+}
+
+.reader-lense.active p:hover,
+.reader-lense.active li:hover {
+    font-family: "OpenDyslexic", sans-serif;
+	background-color: #f4ecd8;
+	filter: unset;
+	color: var(--gray-dark);
+	transition: all .4s ease-in-out;
+	padding: 0.2rem;
+}
