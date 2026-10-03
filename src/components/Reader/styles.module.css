@@ -1,0 +1,10 @@
+
+.reader-lense.active p:hover,
+.reader-lense.active li:hover {
+    font-family: "OpenDyslexic", sans-serif;
+	background-color: #f4ecd8;
+	filter: unset;
+	color: var(--gray-dark);
+	transition: all .4s ease-in-out;
+	padding: 0.2rem;
+}
