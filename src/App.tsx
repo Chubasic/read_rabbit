@@ -7,6 +7,7 @@ import Reader from "./components/Reader/index.tsx";
 import { Input } from "./components/Input.tsx";
 import { ChatInput } from "./components/ChatInput.tsx";
 import { CommandInput } from "./components/CommandInput.tsx";
+import { FileUploadInput } from "./components/FileUploadInput.tsx";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -60,6 +61,9 @@ function App() {
 
 
       <CommandInput commands={[{ label: "open", action: () => { console.log("open") } }]} />
+
+
+      <FileUploadInput />
         <Reader>
           <div class="one" id="one">
 

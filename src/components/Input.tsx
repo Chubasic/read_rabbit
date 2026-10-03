@@ -18,8 +18,7 @@ export type Props = {
   disabled?: boolean;
   /** Change event handler. */
   onChange?: (e: Event) => void;
-  /** Key‑down event handler. */
-  onKeyDown?: (e: KeyboardEvent) => void;
+  [key: string]: any;
 };
 
 export const Input: FunctionalComponent<Props> = ({

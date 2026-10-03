@@ -23,6 +23,11 @@ export type Props = {
 };
 
 /**
+ * LMAO. This looks like it is a component, but it's actually does not work at all
+ */
+
+
+/**
  * A lightweight command palette like input.
  * Shows suggestions as the user types and allows selecting via mouse or
  * arrow keys.
