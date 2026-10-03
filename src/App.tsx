@@ -3,6 +3,9 @@ import { invoke } from "@tauri-apps/api/core";
 import Layout from "./components/layout.tsx";
 import preactLogo from "./assets/preact.svg";
 import Button from "./components/Button.tsx";
+import Reader from "./components/Reader/index.tsx";
+import { Input } from "./components/Input.tsx";
+import { ChatInput } from "./components/ChatInput.tsx";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -50,6 +53,17 @@ function App() {
         >Greet</Button>
       </form>
       <p>{greetMsg}</p>
+
+      <ChatInput onSubmit={(text) => { console.log(text)}}></ChatInput>
+        <Reader>
+          <div class="one" id="one">
+
+
+              <div class="two" id="two">
+                  <div class="three" id="three"></div>
+              </div>
+          </div>
+        </Reader>
     </Layout>
   );
 }

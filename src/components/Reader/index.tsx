@@ -1,14 +1,15 @@
 import type { ComponentChildren, FunctionComponent } from "preact";
+import ReaderToolobar from "./ReaderToggleTools/ReaderToobar.tsx"
 
 type Props = {
-    state: boolean;
     children: ComponentChildren;
 }
 
-const Reader: FunctionComponent<Props> = ({ state, children }: Props) => {
+const Reader: FunctionComponent<Props> = ({ children }: Props) => {
     return (
-        <div className={`${state ? "filter blur-[1.4px] text-black" : ""} mx-4`}>
-            {children}
+      <div className="w-full">
+        <ReaderToolobar />
+        {children}
         </div>
     );
 };

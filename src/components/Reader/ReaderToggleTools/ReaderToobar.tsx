@@ -1,18 +1,19 @@
-import type { Dispatch, StateUpdater } from "preact/hooks";
+// import type { Dispatch, StateUpdater } from "preact/hooks";
 import Button from "../../Button.tsx";
 
 type Props = {
-	readerToggle: Dispatch<StateUpdater<boolean>>;
-	startPracticeSession: () => void;
+	// toggle: Dispatch<StateUpdater<boolean>>;
 };
 
-const ReaderToggleBtn = ({ readerToggle, startPracticeSession }: Props) => {
+const ReaderToolobar = ({ }: Props) => {
     return (
-        <div className="flex items-center justify-between border-b-2 border-(--gray-dark) bg-(--accent)">
+        <div className="rounded flex items-center justify-between border-b-2 border-(--gray-light) bg-(--accent)">
             <Button
                 type="button"
                 className="m-2 rounded-full"
-                onClick={() => readerToggle((prevState) => !prevState)}
+          onClick={() => {
+            // readerToggle((prevState) => !prevState)
+          }}
             >
                 <svg
                     width="28px"
@@ -31,7 +32,7 @@ const ReaderToggleBtn = ({ readerToggle, startPracticeSession }: Props) => {
                     />
 
                     <g id="SVGRepo_iconCarrier">
-                        <title>focus_horizontal_round_round [#840]</title> <desc>Created with Sketch.</desc> <defs></defs>
+                        <title>focus_horizontal_round_round [#840]</title> <desc>circle</desc> <defs></defs>
                         <g
                             id="Page-1"
                             stroke="none"
@@ -59,7 +60,6 @@ const ReaderToggleBtn = ({ readerToggle, startPracticeSession }: Props) => {
             <Button
                 type="button"
                 className="m-2 rounded-full"
-                onClick={startPracticeSession}
             >
                 {/** biome-ignore lint/a11y/noSvgWithoutTitle: Well I dont want to deal with it rn */}
                 <svg width="28px" height="28px" xmlns="http://www.w3.org/2000/svg">
@@ -78,4 +78,4 @@ const ReaderToggleBtn = ({ readerToggle, startPracticeSession }: Props) => {
         </div>
     );
 };
-export default ReaderToggleBtn;
+export default ReaderToolobar;

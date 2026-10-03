@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'media',
-  content: ['./src/**/*.{js,ts,jsx,tsx}', './index.html'],
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    './index.html',
+  ],
   theme: {
     extend: {
       fontFamily: {
@@ -24,10 +27,19 @@ module.exports = {
         foreground: {
           light: '#0f0f0f',
           dark: '#f6f6f6',
-        }
+        },
+        // Custom CSS variable colors
+        accent: 'var(--accent)',
+        'accent-dark': 'var(--accent-dark)',
+        'gray-dark': 'var(--gray-dark)',
+        black: 'rgb(var(--black))',
+        gray: 'rgb(var(--gray))',
+        'gray-light': 'rgb(var(--gray-light))',
+        'btn-darkend-bg': 'var(--btn-darkend-bg)',
       },
       boxShadow: {
-        'button': '0 2px 2px rgba(0, 0, 0, 0.2)',
+        button: '0 2px 2px rgba(0, 0, 0, 0.2)',
+        'btn-darkend': 'var(--box-shadow)',
       },
     },
   },
