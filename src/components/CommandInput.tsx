@@ -1,6 +1,6 @@
 import { FunctionalComponent } from "preact";
 import { useState, useEffect, useRef, useCallback } from "preact/hooks";
-import { Input } from "./Input";
+import { Input } from "./Input.tsx";
 
 /**
  * Representation of a command that can be invoked from the CommandInput.
@@ -102,7 +102,7 @@ export const CommandInput: FunctionalComponent<Props> = ({
             <li
               key={cmd.label}
               class={`px-3 py-2 cursor-pointer
-                ${idx === highlightedIndex ? "bg-blue-100 dark:bg-blue-600" : ""}`}
+                ${idx === highlightedIndex ? "dark:bg-gray-800 dark:border-gray-700" : ""}`}
               onClick={() => handleClickSuggestion(cmd)}
             >
               {cmd.label}

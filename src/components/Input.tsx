@@ -29,6 +29,7 @@ export const Input: FunctionalComponent<Props> = ({
   disabled = false,
   onChange,
   onKeyDown,
+  ref,
 }) => {
   const handleChange = useCallback(
     (e: Event) => {
@@ -52,7 +53,7 @@ export const Input: FunctionalComponent<Props> = ({
       disabled={disabled}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
-      id="el"
+      ref={ref}
       class="mr-1.25 rounded-lg border border-transparent px-3 py-2 text-base font-medium bg-surface-light dark:bg-surface-dark shadow-button outline-none"
     />
   );

@@ -6,6 +6,7 @@ import Button from "./components/Button.tsx";
 import Reader from "./components/Reader/index.tsx";
 import { Input } from "./components/Input.tsx";
 import { ChatInput } from "./components/ChatInput.tsx";
+import { CommandInput } from "./components/CommandInput.tsx";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -54,7 +55,11 @@ function App() {
       </form>
       <p>{greetMsg}</p>
 
-      <ChatInput onSubmit={(text) => { console.log(text)}}></ChatInput>
+
+      <ChatInput onSubmit={(text) => { console.log(text) }}></ChatInput>
+
+
+      <CommandInput commands={[{ label: "open", action: () => { console.log("open") } }]} />
         <Reader>
           <div class="one" id="one">
 
