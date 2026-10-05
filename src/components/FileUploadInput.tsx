@@ -26,7 +26,7 @@ export const FileUploadInput: FunctionalComponent<FileUploadProps> = ({
   );
 
   return (
-    <Input
+    <input
       type="file"
       placeholder={placeholder}
       disabled={disabled}

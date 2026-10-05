@@ -1,17 +1,19 @@
 import { useState } from "preact/hooks";
 import { invoke } from "@tauri-apps/api/core";
-import Layout from "./components/layout.tsx";
+import Layout from "./layouts/layout.tsx";
 import preactLogo from "./assets/preact.svg";
 import Button from "./components/Button.tsx";
 import Reader from "./components/Reader/index.tsx";
-import { Input } from "./components/Input.tsx";
 import { ChatInput } from "./components/ChatInput.tsx";
-import { CommandInput } from "./components/CommandInput.tsx";
 import { FileUploadInput } from "./components/FileUploadInput.tsx";
+import ValueInput from "./components/ValueInput/index.tsx";
+import TextArea from "./components/TextArea/index.tsx";
+import DatePicker from "./components/DatePicker/index.tsx";
+import Slider from "./components/Slider/index.tsx";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+  const [name, setName] = useState<string | number | boolean>("");
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -44,12 +46,29 @@ function App() {
           greet();
         }}
       >
-        <input
-          id="greet-input"
-          class="mr-1.25 rounded-lg border border-transparent px-3 py-2 text-base font-medium bg-surface-light dark:bg-surface-dark shadow-button outline-none"
-          onInput={(e) => setName(e.currentTarget.value)}
+
+        <ValueInput label="Test" onOutput={({value, name: _}) => {
+          setName(value.toString())
+        }}
           placeholder="Enter a name..."
+          value={name as string}
         />
+
+        <TextArea  label="Test" onOutput={({value, name: _}) => {
+          setName(value.toString())
+        }}
+          placeholder="Enter a name..."
+          value={name as string}
+        />
+
+        <DatePicker label="Test" onOutput={({value, name: _}) => {
+          setName(value.toString())
+        }}/>
+
+
+        <Slider label="Test" onOutput={({value, name: _}) => {
+          setName(value.toString())
+        }}/>
         <Button
           type="submit"
         >Greet</Button>
@@ -58,9 +77,6 @@ function App() {
 
 
       <ChatInput onSubmit={(text) => { console.log(text) }}></ChatInput>
-
-
-      <CommandInput commands={[{ label: "open", action: () => { console.log("open") } }]} />
 
 
       <FileUploadInput />

@@ -1,7 +1,8 @@
-import { FunctionalComponent } from 'preact';
-import { useState, useCallback } from 'preact/hooks';
-import { Input } from './Input.tsx';
-import Button from './Button.tsx';
+import { FunctionalComponent } from "preact";
+import { useState, useCallback } from "preact/hooks";
+import Button from "./Button.tsx";
+import ValueInput from "./ValueInput/index.tsx";
+import { OnOutputFnArgs } from "./ComponentsBuilder/types.ts";
 
 /**
  * Chat‑style input used for typing prompts or commands.
@@ -12,40 +13,43 @@ export type Props = {
 };
 
 export const ChatInput: FunctionalComponent<Props> = ({ onSubmit }) => {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
 
-  const handleChange = useCallback((e: Event) => {
-    const target = e.target as HTMLInputElement;
-    setText(target.value);
+  const handleChange = useCallback(({ value, name: _ }: OnOutputFnArgs) => {
+    setText(value.toString());
   }, []);
 
   const submit = useCallback(() => {
     const trimmed = text.trim();
-    if (trimmed !== '') {
+    if (trimmed !== "") {
       onSubmit(trimmed);
-      setText('');
+      setText("");
     }
   }, [text, onSubmit]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      submit();
-    }
-  }, [submit]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        submit();
+      }
+    },
+    [submit],
+  );
 
   return (
     <div class="flex items-center space-x-2">
-      <Input
-        type="text"
+      <ValueInput
         value={text}
+        label=""
         placeholder="Type a prompt…"
-        onChange={handleChange}
+        onOutput={handleChange}
         onKeyDown={handleKeyDown}
       />
+
       <Button
         onClick={submit}
-        className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark"
+        // className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark"
       >
         Send
       </Button>
