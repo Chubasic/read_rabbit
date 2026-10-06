@@ -5,6 +5,7 @@
     "npm:@tailwindcss/vite@^4.3.3": "4.3.3_vite@8.3.1_@types+node@26.6.4",
     "npm:@tauri-apps/api@2": "2.12.1",
     "npm:@tauri-apps/cli@2": "2.12.1",
+    "npm:@tauri-apps/plugin-fs@2.6": "2.6.0",
     "npm:@tauri-apps/plugin-opener@2": "2.7.0",
     "npm:@types/node@^26.6.4": "26.6.4",
     "npm:clsx@^2.1.1": "2.1.1",
@@ -511,6 +512,12 @@
       ],
       "bin": true
     },
+    "@tauri-apps/plugin-fs@2.6.0": {
+      "integrity": "sha512-MhBAZ4rryd+h9fijd/GWDfArqiAeGI0ZNduV4wuRyUVI6wDZ+oDBY7atqtoXKDwlTUVSvpvmWJAY0ehQd/v6Uw==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@tauri-apps/plugin-opener@2.7.0": {
       "integrity": "sha512-mBorYfVKh9Lt7s4ZFtKbMUTxBw+Y/sVmSlKCtkkoBgMTC/DIbt/kaPm67L/2djAUqDI1wbixy5OHHVmipjuGMw==",
       "dependencies": [
@@ -1000,6 +1007,7 @@
         "npm:@tailwindcss/vite@^4.3.3",
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
+        "npm:@tauri-apps/plugin-fs@2.6",
         "npm:@tauri-apps/plugin-opener@2",
         "npm:@types/node@^26.6.4",
         "npm:clsx@^2.1.1",
