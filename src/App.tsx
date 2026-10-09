@@ -1,15 +1,14 @@
 import { useState } from "preact/hooks";
 import { invoke } from "@tauri-apps/api/core";
 import Layout from "./layouts/layout.tsx";
-import preactLogo from "./assets/preact.svg";
-import Button from "./components/Button.tsx";
-import Reader from "./components/Reader/index.tsx";
-import { ChatInput } from "./components/ChatInput.tsx";
-import { FileUploadInput } from "./components/FileUploadInput.tsx";
-import ValueInput from "./components/ValueInput/index.tsx";
-import TextArea from "./components/TextArea/index.tsx";
-import DatePicker from "./components/DatePicker/index.tsx";
-import Slider from "./components/Slider/index.tsx";
+// import preactLogo from "./assets/preact.svg";
+// import Button from "./components/Button.tsx";
+import Reader from "./features/Reader/index.tsx";
+// import { ChatInput } from "./components/ChatInput.tsx";
+// import ValueInput from "./components/ValueInput/index.tsx";
+// import TextArea from "./components/TextArea/index.tsx";
+// import DatePicker from "./components/DatePicker/index.tsx";
+// import Slider from "./components/Slider/index.tsx";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -22,7 +21,7 @@ function App() {
 
   return (
     <Layout>
-
+{/*
       <h1 class="text-center">Welcome to Tauri + Preact</h1>
 
       <div class="flex justify-center">
@@ -76,14 +75,12 @@ function App() {
       <p>{greetMsg}</p>
 
 
-      <ChatInput onSubmit={(text) => { console.log(text) }}></ChatInput>
+      <ChatInput onSubmit={(text) => { console.log(text) }}></ChatInput>*/}
 
 
-      <FileUploadInput />
+
         <Reader>
           <div class="one" id="one">
-
-
               <div class="two" id="two">
                   <div class="three" id="three"></div>
               </div>
