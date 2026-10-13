@@ -81,9 +81,7 @@ function App() {
 
         <Reader>
           <div class="one" id="one">
-              <div class="two" id="two">
-                  <div class="three" id="three"></div>
-              </div>
+
           </div>
         </Reader>
     </Layout>

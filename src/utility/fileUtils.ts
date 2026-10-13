@@ -16,7 +16,7 @@ export function fileExists(
 ): Promise<boolean> {
   return exists(path, { baseDir });
 }
-
+// Move to backend
 export async function readFile(path: string, baseDir: BaseDirectory): Promise<Uint8Array<ArrayBuffer>> {
   const fileHandle = await open(path, { baseDir });
   const stat = await fileHandle.stat();
