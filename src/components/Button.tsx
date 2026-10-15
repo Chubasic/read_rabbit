@@ -1,19 +1,27 @@
-import type { JSX, Signalish } from "preact";
+import type { ComponentChildren, HTMLAttributes, Signalish } from "preact";
 
-type ButtonProps = {
+type ButtonProps = HTMLAttributes<HTMLButtonElement> & {
     type?: Signalish<"submit" | "reset" | "button" | undefined>;
-    children: JSX.Element | string;
     className?: string;
     onClick?: (e: Event) => void;
-};
+    disabled?: boolean
+  children: ComponentChildren;
+}
 
-function Button({type = "button", className, children: text, onClick}: ButtonProps) {
+function Button({type = "button", className, children: text, onClick, disabled, ...rest}: ButtonProps) {
     return (
       <button
-         class={`rounded-lg border border-transparent px-4 py-3 text-base font-medium bg-surface-light dark:bg-surface-dark shadow-button transition-colors duration-250 cursor-pointer hover:border-[#396cd8] active:border-[#396cd8] active:bg-[#e8e8e8] dark:active:bg-[#0f0f0f69] outline-none ${className || ""}`}
+        {...rest}
+        disabled={disabled}
+        class={`rounded-xl px-6 py-3 m-2 text-base font-extrabold dark:bg-surface-dark light:bg-surface-light
+            shadow-[inset_2px_2px_10px_var(--accent)]
+            transition-[transform,shadow] duration-200 cursor-pointer
+            hover:border-(--accent)
+            border-transparent
+            border
+            active:translate-y-1 ${className || ""}`}
         type={type}
-        onClick={onClick}
-      >
+        onClick={onClick}>
         {text}
       </button>
     );

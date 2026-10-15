@@ -1,5 +1,7 @@
-const config = require('config');
-
-exports.get = key =>{
-  return process.env[key] || config[key];
-};
+export default function Configuration() {
+  return (
+    <div class="two" id="two">
+        <div class="three" id="three"></div>
+    </div>
+  )
+}
