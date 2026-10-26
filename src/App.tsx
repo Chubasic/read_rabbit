@@ -9,14 +9,19 @@ import Reader from "./features/Reader/index.tsx";
 // import TextArea from "./components/TextArea/index.tsx";
 // import DatePicker from "./components/DatePicker/index.tsx";
 // import Slider from "./components/Slider/index.tsx";
+  import { appConfigDir } from '@tauri-apps/api/path';
 
 function App() {
+
+
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState<string | number | boolean>("");
 
   async function greet() {
+    const appConfigDirPath = await appConfigDir();
+    setName(appConfigDirPath)
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+    setGreetMsg(await invoke("greet", { appConfigDirPath }));
   }
 
   return (
@@ -72,7 +77,6 @@ function App() {
           type="submit"
         >Greet</Button>
       </form>
-      <p>{greetMsg}</p>
 
 
       <ChatInput onSubmit={(text) => { console.log(text) }}></ChatInput>*/}
@@ -81,7 +85,8 @@ function App() {
 
         <Reader>
           <div class="one" id="one">
-
+      <p>{greetMsg}</p>
+              <button onClick={greet}>Ya</button>
           </div>
         </Reader>
     </Layout>

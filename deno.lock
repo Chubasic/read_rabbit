@@ -7,6 +7,7 @@
     "npm:@tauri-apps/cli@2": "2.12.1",
     "npm:@tauri-apps/plugin-fs@2.6": "2.6.0",
     "npm:@tauri-apps/plugin-opener@2": "2.7.0",
+    "npm:@tauri-apps/plugin-sql@2.6": "2.6.0",
     "npm:@types/node@^26.6.4": "26.6.4",
     "npm:clsx@^2.1.1": "2.1.1",
     "npm:lenis@^1.3.26": "1.3.26",
@@ -596,6 +597,12 @@
         "@tauri-apps/api"
       ]
     },
+    "@tauri-apps/plugin-sql@2.6.0": {
+      "integrity": "sha512-UfP4p3Zwh6N7ODRMgnMgXSN6rfUxFo7YXHnRjX8L3Vx7i+IV0bh+r8puwv2OnGq04SLDZFY+LvotxN+pJdZ1Zg==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@types/estree@1.0.9": {
       "integrity": "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="
     },
@@ -1087,6 +1094,7 @@
         "npm:@tauri-apps/cli@2",
         "npm:@tauri-apps/plugin-fs@2.6",
         "npm:@tauri-apps/plugin-opener@2",
+        "npm:@tauri-apps/plugin-sql@2.6",
         "npm:@types/node@^26.6.4",
         "npm:clsx@^2.1.1",
         "npm:lenis@^1.3.26",
