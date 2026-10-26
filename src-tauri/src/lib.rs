@@ -1,6 +1,7 @@
 pub mod migrations;
 use crate::migrations::ADD_BOOK_TABLE;
 use crate::migrations::ADD_USER_CONFIG_TABLE;
+use crate::migrations::ALTER_BOOKS_TABLE;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -12,7 +13,7 @@ fn greet(name: &str) -> String {
 pub fn run() {
     const DB_URI: &str = "sqlite:rabbitread.db";
 
-    let migrations = vec![ADD_BOOK_TABLE, ADD_USER_CONFIG_TABLE];
+    let migrations = vec![ADD_BOOK_TABLE, ADD_USER_CONFIG_TABLE, ALTER_BOOKS_TABLE];
     tauri::Builder::default()
         .plugin(
             tauri_plugin_sql::Builder::new()

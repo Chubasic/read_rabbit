@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # This script creates a new migration file in src-tauri/src/migrations/
-# The file name is prefixed with the current timestamp and the user supplied name.
+# The file name is prefixed with the current timestamp
 # Example: 20241026123045_create_users.rs
 #
 # Usage: ./mkmigration.sh migration_name
@@ -16,12 +16,12 @@ TIMESTAMP=$(date +%Y%m%d%H%M%S)
 NAME="$1"
 UP_CONST=$(echo "$NAME" | tr '[:lower:]' '[:upper:]')
 DOWN_CONST="${UP_CONST}_DOWN"
-FILENAME="src-tauri/src/migrations/${TIMESTAMP}_${NAME}.rs"
+FILENAME="src/migrations/${TIMESTAMP}_${NAME}.rs"
 
 # Create the migrations directory if it does not exist
-mkdir -p "src-tauri/src/migrations"
+mkdir -p "src/migrations"
 
-cat > "$FILENAME" <<'EOF'
+cat > "$FILENAME" << EOF
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 pub const ${UP_CONST}: Migration = Migration {
