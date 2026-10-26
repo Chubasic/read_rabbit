@@ -27,7 +27,7 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 pub const ${UP_CONST}: Migration = Migration {
     version: 1,
     description: "$NAME",
-    sql: "SELECT load_extension('uuid.so');\nCREATE TABLE IF NOT EXISTS ${NAME} (id BLOB PRIMARY KEY DEFAULT (randomblob(16)));\nINSERT INTO migrations (id, name, created_at) VALUES (hex(randomblob(16)), '$NAME', datetime('now'));",
+    sql: "CREATE TABLE IF NOT EXISTS ${NAME} (id BLOB PRIMARY KEY DEFAULT (randomblob(16)));\nINSERT INTO migrations (id, name, created_at) VALUES (hex(randomblob(16)), '$NAME', datetime('now'));",
     kind: MigrationKind::Up,
 };
 
