@@ -1,4 +1,5 @@
 mod books;
+mod db;
 mod migrations;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
