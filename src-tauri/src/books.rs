@@ -47,3 +47,34 @@ pub async fn save_book(book: BookPreSave) {
         Err(msg) => eprintln!("Failed to load book: {}", msg),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+    use std::fs::write;
+
+    // Successful read – returns the exact bytes we wrote.
+    #[tokio::test]
+    async fn test_open_book_success() {
+        // Create a temporary file with known contents
+        let tmp_dir = env::temp_dir();
+        let file_path = tmp_dir.join("open_book_test_success.txt");
+        write(&file_path, b"Hello, world!").expect("Failed to write test file");
+
+        let path_str = file_path.to_string_lossy().to_string();
+        let result = open_book(path_str).await;
+
+        assert!(result.is_ok());
+        let bytes = result.unwrap();
+        assert_eq!(bytes, b"Hello, world!");
+    }
+
+    // Path that does not exist – should propagate an error.
+    #[tokio::test]
+    async fn test_open_book_not_found() {
+        let path = "/nonexistent/path/does_not_exist.txt".to_string();
+        let result = open_book(path).await;
+        assert!(result.is_err());
+    }
+}
