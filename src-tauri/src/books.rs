@@ -62,7 +62,7 @@ async fn open_book(path: &str) -> Result<Vec<u8>, std::io::Error> {
 async fn upsert_book(book: Book) {
     match connection().await {
         Ok(mut conn) => match conn.begin().await {
-            Ok(mut tx) => {
+            Ok(mut trx) => {
                 let result = sqlx::query(
                     r#"
                           INSERT INTO books
@@ -82,12 +82,12 @@ async fn upsert_book(book: Book) {
                 .bind(&book.language)
                 .bind(&book.last_opened.to_string()) // last_opened
                 .bind(&book.date_added.to_string()) // date_added
-                .execute(&mut *tx)
+                .execute(&mut *trx) // This is literally a programming skateboarding...
                 .await;
 
                 match result {
                     Ok(_) => {
-                        if tx.commit().await.is_err() {
+                        if trx.commit().await.is_err() {
                             eprintln!("Transaction commit failed");
                         } else {
                             println!("Saved book '{}' (id: {})", book.title, book.content_id);
