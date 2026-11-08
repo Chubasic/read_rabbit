@@ -14,26 +14,36 @@ type Props = {
   children: ComponentChildren;
 };
 
+
+// when using `"withGlobalTauri": true`, you may use
+// const { open } = window.__TAURI__.dialog;
+
 const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [fileOpenError, setFileOpenError] = useState<string | undefined>(
     undefined,
   );
   const [file, setFile] = useState<File | null>(null);
+  const [filePath, setFilePath] = useState<string | null>(null)
+
 
   const onFilesSelected = useCallback(
-    (files: FileList | null) => {
-      if (!files) return;
-      const file = files[0];
-      const result = validateFile(file, textFileSchema);
-      if (result.error) {
-        setFileOpenError(z.treeifyError(result.error).errors[0]);
-        return;
-      } else {
-        setFileOpenError(undefined);
-        setFile(file);
-      }
+    (filesMap: Map<string, File> | null) => {
+      if (!filesMap) return;
+      // Take the first file in the map
+      const file = filesMap.values().next().value as File;
+      if (!file) return;
+      console.log(file)
+      // const validation = validateFile(file, textFileSchema);
+      // if (validation.error) {
+      //   setFilePath(null);
+      //   setFileOpenError(z.treeifyError(validation.error).errors[0]);
+      //   return;
+      // } else {
+      //   setFileOpenError(undefined);
+      //   setFile(file);
+      // }
     },
-    [setFileOpenError, fileOpenError, setFile],
+    [setFileOpenError, fileOpenError, setFile, filePath],
   );
 
   function readerStrategy(fileData: File) {
@@ -47,10 +57,10 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
         return <PDFReader file={fileData} />;
       }
       case "application/x-fictionbook+xml":
-        console.log("Handling FB2 file");
+        console.log("Handling FB2 file has been not implemented");
         return null;
       case "application/epub+zip":
-        console.log("Handling EBUP file");
+        console.log("Handling EBUP file has been not implemented");
         return null;
       default:
         throw new Error(`Unsupported file format: ${extension}`);
@@ -62,7 +72,6 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
       <ReaderToolobar>
         <FileUploadInput
           onFilesChange={onFilesSelected}
-          accepted=".pdf, .epub, .fb2"
         >
           <PlusIcon />
         </FileUploadInput>

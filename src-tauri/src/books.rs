@@ -66,14 +66,15 @@ async fn upsert_book(book: Book) {
                 let result = sqlx::query(
                     r#"
                           INSERT INTO books
-                              (id, title, path, language, last_opened, date_added)
-                          VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+                              (id, title, path, language, last_opened, date_added, content_id)
+                          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
                           ON CONFLICT(id) DO UPDATE SET
                               title = excluded.title,
                               path = excluded.path,
                               language = excluded.language,
                               last_opened = excluded.last_opened,
                               date_added = excluded.date_added
+                              content_id = excluded.content_id
                           "#,
                 )
                 .bind(&book.content_id)
@@ -82,6 +83,7 @@ async fn upsert_book(book: Book) {
                 .bind(&book.language)
                 .bind(&book.last_opened.to_string()) // last_opened
                 .bind(&book.date_added.to_string()) // date_added
+                .bind(&book.content_id)
                 .execute(&mut *trx) // This is literally a programming skateboarding...
                 .await;
 

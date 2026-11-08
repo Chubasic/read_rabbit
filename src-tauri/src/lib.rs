@@ -18,6 +18,7 @@ pub fn run() {
         migrations::ALTER_BOOKS_TABLE,
     ];
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_sql::Builder::new()
                 .add_migrations(DB_URI, migrations)
