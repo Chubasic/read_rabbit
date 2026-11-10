@@ -3,7 +3,7 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 pub const ALTER_BOOKS_TABLE: Migration = Migration {
     version: 3,
     description: "alter_books_table",
-    sql: "ALTER TABLE books DROP COLUMN date_added;\nALTER TABLE books ADD COLUMN date_added TIMESTAMP;\nALTER TABLE books ADD COLUMN content_id TEXT;\nALTER TABLE books ADD COLUMN language TEXT;\nALTER TABLE books ADD COLUMN last_page INTEGER;\nALTER TABLE books ADD COLUMN last_opened TIMESTAMP;\nALTER TABLE books RENAME COLUMN name TO title;",
+    sql: "ALTER TABLE books DROP COLUMN date_added;\nALTER TABLE books ADD COLUMN date_added TIMESTAMP NOT NULL;\nALTER TABLE books ADD COLUMN content_id TEXT NOT NULL;\nALTER TABLE books ADD COLUMN language TEXT NOT NULL;\nALTER TABLE books ADD COLUMN last_page INTEGER NOT NULL;\nALTER TABLE books ADD COLUMN last_opened TIMESTAMP NOT NULL;\nALTER TABLE books RENAME COLUMN name TO title;",
     kind: MigrationKind::Up,
 };
 
