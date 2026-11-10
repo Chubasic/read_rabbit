@@ -1,12 +1,13 @@
-use crate::db::connection;
+use crate::db::{db_connect, ConnectionFn};
 use blake3::Hash;
 use chrono::{DateTime, Local};
 use serde::Deserialize;
 use sqlx::Connection;
+use tauri::{AppHandle, Manager};
 use tokio::fs;
 
 #[derive(Deserialize)]
-#[serde(untagged)]
+#[serde(rename_all = "PascalCase")]
 enum Languages {
     English,
 }
@@ -33,7 +34,8 @@ fn hash_contents(book_bytes: &[u8]) -> Hash {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn save_book(presave_book: BookPreSave) {
+pub async fn save_book(presave_book: BookPreSave, app: AppHandle) {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string());
     match open_book(&presave_book.path).await {
         Ok(bytes) => {
             let hash = hash_contents(&bytes);
@@ -47,34 +49,32 @@ pub async fn save_book(presave_book: BookPreSave) {
                 last_opened: Local::now(),
                 date_added: Local::now(),
             };
-
-            upsert_book(book).await
+            let connection = db_connect(dir);
+            upsert_book(book, connection).await
         }
         Err(msg) => eprintln!("Failed to load book: {}", msg),
     }
 }
 
 async fn open_book(path: &str) -> Result<Vec<u8>, std::io::Error> {
-    let contents = fs::read_to_string(path).await?;
-    Ok(contents.into_bytes())
+    return fs::read(path).await;
 }
 
-async fn upsert_book(book: Book) {
+async fn upsert_book(book: Book, connection: ConnectionFn) {
     match connection().await {
         Ok(mut conn) => match conn.begin().await {
             Ok(mut trx) => {
                 let result = sqlx::query(
                     r#"
                           INSERT INTO books
-                              (id, title, path, language, last_opened, date_added, content_id)
-                          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+                              (id, title, path, language, last_opened, date_added)
+                          VALUES (?1, ?2, ?3, ?4, ?5, ?6)
                           ON CONFLICT(id) DO UPDATE SET
                               title = excluded.title,
                               path = excluded.path,
                               language = excluded.language,
                               last_opened = excluded.last_opened,
                               date_added = excluded.date_added
-                              content_id = excluded.content_id
                           "#,
                 )
                 .bind(&book.content_id)
@@ -83,7 +83,6 @@ async fn upsert_book(book: Book) {
                 .bind(&book.language)
                 .bind(&book.last_opened.to_string()) // last_opened
                 .bind(&book.date_added.to_string()) // date_added
-                .bind(&book.content_id)
                 .execute(&mut *trx) // This is literally a programming skateboarding...
                 .await;
 
@@ -127,7 +126,7 @@ mod tests {
         write(&file_path, b"Hello, world!").expect("Failed to write test file");
 
         let path_str = file_path.to_string_lossy().to_string();
-        let result = open_book(path_str).await;
+        let result = open_book(&path_str).await;
 
         assert!(result.is_ok());
         let bytes = result.unwrap();
@@ -138,7 +137,7 @@ mod tests {
     #[tokio::test]
     async fn test_open_book_not_found() {
         let path = "/nonexistent/path/does_not_exist.txt".to_string();
-        let result = open_book(path).await;
+        let result = open_book(&path).await;
         assert!(result.is_err());
     }
 }

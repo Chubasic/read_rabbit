@@ -1,22 +1,24 @@
-import z from "zod";
+import { invoke } from '@tauri-apps/api/core';
 import { ComponentChildren, FunctionComponent } from "preact";
-import { useCallback, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { FileUploadInput } from "../../components/FileUploadInput.tsx";
 import ReaderToolobar from "./ReaderTools/ReaderToolbar.tsx";
-import { validateFile } from "../../utility/validateFile.ts";
-import { textFileSchema } from "./validation.ts";
+// import z from "zod";
+// import { validateFile } from "../../utility/validateFile.ts";
+// import { textFileSchema } from "./validation.ts";
 import PlusIcon from "../../components/icons/PlusIcon.tsx";
 import PDFReader from "./components/PDFReader.tsx";
 
 type Reader = typeof PDFReader | any;
 
+enum Languages {
+  English = "English"
+}
+
 type Props = {
   children: ComponentChildren;
 };
 
-
-// when using `"withGlobalTauri": true`, you may use
-// const { open } = window.__TAURI__.dialog;
 
 const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [fileOpenError, setFileOpenError] = useState<string | undefined>(
@@ -24,27 +26,43 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   );
   const [file, setFile] = useState<File | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null)
-
+  const [language, setLanguage] = useState<Languages>(Languages.English)
 
   const onFilesSelected = useCallback(
     (filesMap: Map<string, File> | null) => {
       if (!filesMap) return;
       // Take the first file in the map
-      const file = filesMap.values().next().value as File;
-      if (!file) return;
+      const [path, file] = filesMap.entries().next().value || []
+
+      if (!file || !path) return;
       console.log(file)
-      // const validation = validateFile(file, textFileSchema);
-      // if (validation.error) {
-      //   setFilePath(null);
-      //   setFileOpenError(z.treeifyError(validation.error).errors[0]);
-      //   return;
-      // } else {
-      //   setFileOpenError(undefined);
-      //   setFile(file);
+      console.log("Size", file.size)
+      console.log(path)
+
+      setFile(file);
+      setFilePath(path);
+
       // }
     },
     [setFileOpenError, fileOpenError, setFile, filePath],
   );
+
+
+  useEffect(() => {
+    function cleanup() { }
+    if (!file) return cleanup
+
+    invoke('save_book', {
+      presave_book: {
+        path: filePath,
+        title: file.name,
+        language,
+      }
+    });
+
+
+    return cleanup
+  }, [filePath])
 
   function readerStrategy(fileData: File) {
     if (!(fileData instanceof File)) {
@@ -53,14 +71,14 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
 
     const extension = fileData.type;
     switch (extension) {
-      case "application/pdf": {
+      case "pdf": {
         return <PDFReader file={fileData} />;
       }
-      case "application/x-fictionbook+xml":
-        console.log("Handling FB2 file has been not implemented");
+      case "fb2":
+        console.log("Handling FB2 file has not been implemented");
         return null;
-      case "application/epub+zip":
-        console.log("Handling EBUP file has been not implemented");
+      case "epub":
+        console.log("Handling EBUP file has not been implemented");
         return null;
       default:
         throw new Error(`Unsupported file format: ${extension}`);

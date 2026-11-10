@@ -1,9 +1,10 @@
 import { DialogFilter, open } from "@tauri-apps/plugin-dialog";
-import { readFile, stat } from "@tauri-apps/plugin-fs";
+import { readFile } from "@tauri-apps/plugin-fs";
 
 import { ComponentChildren, FunctionalComponent } from "preact";
 import { useCallback } from "preact/hooks";
 import Button from "./Button.tsx";
+import { extname } from "@tauri-apps/api/path";
 
 export type FileUploadProps = {
   multiple?: boolean;
@@ -36,16 +37,22 @@ export const FileUploadInput: FunctionalComponent<FileUploadProps> = ({
       filters: [{
         name: "default", extensions: ["pdf", "epub", "fb2"]
       }],
+
     });
     if (filePath) {
       if (onFilesChange) {
         const map = new Map<string, File>();
         const paths = Array.isArray(filePath) ? filePath : [filePath];
         for (const path of paths) {
-          const fileName = path.split("/").pop();
           const fileContent = await readFile(path);
+          const fileName: string = path
+            .split("/")
+            .pop()
+            .replace(/\.[^.]*$/, "");
+
           const newFile = new File([fileContent], fileName, {
             lastModified: Date.now(),
+            type: await extname(path)
 
           });
           map.set(path, newFile);
