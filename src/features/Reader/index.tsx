@@ -6,6 +6,9 @@ import ReaderToolobar from "./ReaderTools/ReaderToolbar.tsx";
 
 import PlusIcon from "../../components/icons/PlusIcon.tsx";
 import PDFReader from "./components/PDFReader.tsx";
+import { validateFile } from '../../utility/validateFile.ts';
+import { textFileSchema } from './validation.ts';
+import z from 'zod';
 
 type Reader = typeof PDFReader | any;
 
@@ -33,10 +36,10 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
       const [path, file] = filesMap.entries().next().value || []
 
       if (!file || !path) return;
-      console.log(file)
-      console.log("Size", file.size)
-      console.log(path)
-
+      const result = validateFile(file, textFileSchema);
+      if (result.error) {
+        setFileOpenError(z.treeifyError(result.error).errors[0]);
+      }
       setFile(file);
       setFilePath(path);
 
