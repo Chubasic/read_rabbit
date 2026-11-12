@@ -2,7 +2,7 @@
 import { ComponentChildren } from "preact";
 import Button from "../../../components/Button.tsx";
 import Icon2 from "../../../components/icons/Icon2.tsx";
-import Icon1  from "../../../components/icons/Icon1.tsx";
+import Icon1 from "../../../components/icons/Icon1.tsx";
 
 type Props = {
   // toggle: Dispatch<StateUpdater<boolean>>;
@@ -11,7 +11,7 @@ type Props = {
 
 const ReaderToolobar = ({ children }: Props) => {
   return (
-    <div className="rounded flex items-center justify-between border-b-2 border-(--gray-light)">
+    <div className="flex items-center justify-between rounded-4xl p-2 m-4 backdrop-blur-2xl dark:bg-surface-dark/45 light:bg-surface-dark/15 border-stone-300 border shadow-[inset_2px_1px_6px_var(--accent)]">
       {children}
       <Button
         type="button"
