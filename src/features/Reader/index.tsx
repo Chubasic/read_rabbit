@@ -29,6 +29,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [filePath, setFilePath] = useState<string | null>(null)
   const [language, setLanguage] = useState<Languages>(Languages.English)
 
+
   const onFilesSelected = useCallback(
     (filesMap: Map<string, File> | null) => {
       if (!filesMap) return;

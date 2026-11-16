@@ -5,11 +5,12 @@ import {
   type PDFDocumentProxy,
   type PDFPageProxy,
 } from "pdfjs-dist";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import Button from "../../../components/Button.tsx";
 import { CanvasLayer, TextLayer } from "./PDFReader/layers/index.ts";
 GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 import "pdfjs-dist/web/pdf_viewer.css"; // styles for .textLayer
+import useBookContext from "../hooks/useBookContext.tsx";
 
 type PDFReaderProps = {
   file: File;
@@ -17,15 +18,16 @@ type PDFReaderProps = {
 
 export default function PDFReader({ file }: PDFReaderProps) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
-  const [pageNum, setPageNum] = useState(1);
+  const [prevPage, nextPage, currentPage] = useBookContext()
   const [error, setError] = useState<string | null>(null);
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);
+
+
   // 1. Load the document whenever the file changes
   // Remove page/viewport load from file change effect
   useEffect(() => {
     setPdfDoc(null);
-    setPageNum(1);
     setError(null);
 
     const load = async () => {
@@ -45,7 +47,7 @@ export default function PDFReader({ file }: PDFReaderProps) {
     let cancelled = false;
     const loadPage = async () => {
       try {
-        const page = await pdfDoc.getPage(pageNum);
+        const page = await pdfDoc.getPage(currentPage);
         if (cancelled) return;
         const viewport = page.getViewport({
           scale: 1.5 * (globalThis.devicePixelRatio || 1),
@@ -60,16 +62,7 @@ export default function PDFReader({ file }: PDFReaderProps) {
     return () => {
       cancelled = true;
     };
-  }, [pdfDoc, pageNum]);
-
-  const prevPage = useCallback(
-    () => setPageNum(pageNum - 1),
-    [setPageNum, pageNum],
-  );
-  const nextPage = useCallback(
-    () => setPageNum(pageNum + 1),
-    [setPageNum, pageNum],
-  );
+  }, [pdfDoc, currentPage]);
 
   if (error) return <p class="text-red-600">{error}</p>;
   if (!pdfDoc) return <p>Loading…</p>;
@@ -77,19 +70,19 @@ export default function PDFReader({ file }: PDFReaderProps) {
   return (
     <div class="flex flex-col items-center gap-2">
       <div class="flex items-center gap-3">
-        <Button disabled={pageNum <= 1} onClick={prevPage}>
+        <Button disabled={currentPage <= 1} onClick={prevPage}>
           Prev
         </Button>
         <span>
-          {pageNum} / {pdfDoc.numPages}
+          {currentPage} / {pdfDoc.numPages}
         </span>
-        <Button disabled={pageNum >= pdfDoc.numPages} onClick={nextPage}>
+        <Button disabled={currentPage >= pdfDoc.numPages} onClick={nextPage}>
           Next
         </Button>
       </div>
-      <div class="relative" style={{ width: viewport?.width, height: viewport?.height,  }}>
-        <CanvasLayer page={page} viewport={viewport} pageNum={pageNum} />
-        <TextLayer page={page} viewport={viewport} pageNum={pageNum} />
+      <div class="relative" style={{ width: viewport?.width, height: viewport?.height, }}>
+        <CanvasLayer page={page} viewport={viewport} pageNum={currentPage} />
+        <TextLayer page={page} viewport={viewport} pageNum={currentPage} />
       </div>
     </div>
   );
