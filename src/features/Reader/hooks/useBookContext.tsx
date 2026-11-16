@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "preact/hooks";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { invoke } from "@tauri-apps/api/core";
 
-export default function useBookContext(): [() => void, () => void, number] {
+export default function useBookContext(bookId: string): [() => void, () => void, number] {
   const [pageNum, setPageNum] = useState(1);
   const debouncedLastPage = useDebounce(1, 10000)
 
@@ -18,7 +18,7 @@ export default function useBookContext(): [() => void, () => void, number] {
   useEffect(() => {
     invoke('set_last_page', {
       presaveBook: {
-        // id: BookId,
+        id: bookId,
         lastPage: debouncedLastPage,
       }
     });

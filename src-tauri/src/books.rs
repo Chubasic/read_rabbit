@@ -51,8 +51,10 @@ struct BookPatch {
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn set_last_page(patch: BookLastPageUpdate, app: AppHandle) {
-    // TODO: A funny thing. Change it
-    let dir = app.path().app_data_dir().map_err(|e| e.to_string());
+    let dir = app
+        .path()
+        .app_data_dir()
+        .expect("Failed to get app data dir");
     let connection = db_connect(dir);
     let book_patch = BookPatch {
         id: patch.id,
@@ -71,28 +73,27 @@ fn hash_contents(book_bytes: &[u8]) -> Hash {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn save_book(presave_book: BookPreSave, app: AppHandle) {
-    let dir = app.path().app_data_dir().map_err(|e| e.to_string());
-    match open_book(&presave_book.path).await {
-        Ok(bytes) => {
-            let hash = hash_contents(&bytes);
-            let book_id = hash.to_string();
-            let book = BookPatch {
-                id: book_id,
-                title: Some(presave_book.title),
-                language: match presave_book.language {
-                    Languages::English => Some(String::from("en")), // This looks really bad :)
-                },
-                path: Some(presave_book.path),
-                last_page: Some(1),
-                last_opened: Some(Local::now().with_timezone(&Utc)),
-                date_added: Some(Local::now().with_timezone(&Utc)),
-            };
-            let connection = db_connect(dir);
-            upsert_book(book, connection).await
-        }
-        Err(msg) => eprintln!("Failed to load book: {}", msg),
-    }
+pub async fn save_book(presave_book: BookPreSave, app: AppHandle) -> Result<BookId, String> {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let bytes = open_book(&presave_book.path)
+        .await
+        .map_err(|e| e.to_string())?;
+    let hash = hash_contents(&bytes);
+    let book_id = hash.to_string();
+    let book = BookPatch {
+        id: book_id.clone(),
+        title: Some(presave_book.title),
+        language: match presave_book.language {
+            Languages::English => Some(String::from("en")),
+        },
+        path: Some(presave_book.path),
+        last_page: Some(1),
+        last_opened: Some(Local::now().with_timezone(&Utc)),
+        date_added: Some(Local::now().with_timezone(&Utc)),
+    };
+    let connection = db_connect(dir);
+    upsert_book(book, connection).await;
+    Ok(book_id)
 }
 
 async fn open_book(path: &str) -> Result<Vec<u8>, std::io::Error> {

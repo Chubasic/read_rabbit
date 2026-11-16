@@ -14,11 +14,12 @@ import useBookContext from "../hooks/useBookContext.tsx";
 
 type PDFReaderProps = {
   file: File;
+  bookId: string
 };
 
-export default function PDFReader({ file }: PDFReaderProps) {
+export default function PDFReader({ file, bookId }: PDFReaderProps) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
-  const [prevPage, nextPage, currentPage] = useBookContext()
+  const [prevPage, nextPage, currentPage] = useBookContext(bookId)
   const [error, setError] = useState<string | null>(null);
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);

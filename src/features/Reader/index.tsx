@@ -28,6 +28,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null)
   const [language, setLanguage] = useState<Languages>(Languages.English)
+  const [bookId, setBookId] = useState<string | null>(null)
 
 
   const onFilesSelected = useCallback(
@@ -51,41 +52,41 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
 
 
   useEffect(() => {
-    function cleanup() { }
-    if (!file) return cleanup
-
-    invoke('save_book', {
-      presave_book: {
-        path: filePath,
-        title: file.name,
-        language,
-      }
-    });
-
-
-    return cleanup
-  }, [filePath])
-
-  function readerStrategy(fileData: File) {
-    if (!(fileData instanceof File)) {
-      throw new Error("File data must be a File instance");
+    async function saveBook() {
+      if (!file || !filePath) return;
+      const bookId: string = await invoke('save_book', {
+        presave_book: {
+          path: filePath,
+          title: file.name,
+          language,
+        }
+      });
+      setBookId(bookId)
+      console.log('Saved book with ID:', bookId);
     }
+    saveBook();
+    return () => { };
+  }, [filePath, file, language])
+
+  const readerStrategy = useCallback(function (fileData: File) {
+    if (!(fileData instanceof File)) { setFileOpenError("File data must be a File instance"); return }
+    if (!bookId) { setFileOpenError("Error while opening the file"); return }
 
     const extension = fileData.type;
     switch (extension) {
       case "pdf": {
-        return <PDFReader file={fileData} />;
+        return <PDFReader file={fileData} bookId={bookId} />;
       }
       case "fb2":
-        console.log("Handling FB2 file has not been implemented");
+        setFileOpenError("Handling FB2 file has not been implemented");
         return null;
       case "epub":
-        console.log("Handling EBUP file has not been implemented");
+        setFileOpenError("Handling EBUP file has not been implemented");
         return null;
       default:
-        throw new Error(`Unsupported file format: ${extension}`);
+        setFileOpenError(`Unsupported file format: ${extension}`);
     }
-  }
+  }, [bookId])
 
   return (
     <div className="w-full">
