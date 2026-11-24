@@ -1,10 +1,12 @@
 use crate::db::{db_connect, ConnectionFn};
 use blake3::Hash;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 use serde::Deserialize;
 use sqlx::Connection;
 use tauri::{AppHandle, Manager};
 use tokio::fs;
+
+type BookId = String;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -20,13 +22,50 @@ pub struct BookPreSave {
     language: Languages,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct BookLastPageUpdate {
+    id: BookId,
+    last_page: u32,
+}
+
 struct Book {
-    content_id: String, // Well maybe not
+    id: BookId,
     title: String,
     path: String,
     language: String,
-    last_opened: DateTime<Local>,
-    date_added: DateTime<Local>,
+    last_page: u32,
+    last_opened: DateTime<Utc>,
+    date_added: DateTime<Utc>,
+}
+
+struct BookPatch {
+    id: BookId,
+    title: Option<String>,
+    path: Option<String>,
+    language: Option<String>,
+    last_page: Option<u32>,
+    last_opened: Option<DateTime<Utc>>,
+    date_added: Option<DateTime<Utc>>,
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn set_last_page(patch: BookLastPageUpdate, app: AppHandle) {
+    let dir = app
+        .path()
+        .app_data_dir()
+        .expect("Failed to get app data dir");
+    let connection = db_connect(dir);
+    let book_patch = BookPatch {
+        id: patch.id,
+        last_page: Some(patch.last_page),
+        last_opened: Some(Local::now().with_timezone(&Utc)),
+        title: None,
+        date_added: None,
+        path: None,
+        language: None,
+    };
+    update_book(book_patch, connection).await;
 }
 
 fn hash_contents(book_bytes: &[u8]) -> Hash {
@@ -34,64 +73,116 @@ fn hash_contents(book_bytes: &[u8]) -> Hash {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn save_book(presave_book: BookPreSave, app: AppHandle) {
-    let dir = app.path().app_data_dir().map_err(|e| e.to_string());
-    match open_book(&presave_book.path).await {
-        Ok(bytes) => {
-            let hash = hash_contents(&bytes);
-            let book = Book {
-                content_id: hash.to_string(),
-                title: presave_book.title,
-                language: match presave_book.language {
-                    Languages::English => String::from("en"), // This looks really bad :)
-                },
-                path: presave_book.path,
-                last_opened: Local::now(),
-                date_added: Local::now(),
-            };
-            let connection = db_connect(dir);
-            upsert_book(book, connection).await
-        }
-        Err(msg) => eprintln!("Failed to load book: {}", msg),
-    }
+pub async fn save_book(presave_book: BookPreSave, app: AppHandle) -> Result<BookId, String> {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let bytes = open_book(&presave_book.path)
+        .await
+        .map_err(|e| e.to_string())?;
+    let hash = hash_contents(&bytes);
+    let book_id = hash.to_string();
+    let book = BookPatch {
+        id: book_id.clone(),
+        title: Some(presave_book.title),
+        language: match presave_book.language {
+            Languages::English => Some(String::from("en")),
+        },
+        path: Some(presave_book.path),
+        last_page: Some(1),
+        last_opened: Some(Local::now().with_timezone(&Utc)),
+        date_added: Some(Local::now().with_timezone(&Utc)),
+    };
+    let connection = db_connect(dir);
+    upsert_book(book, connection).await;
+    Ok(book_id)
 }
 
 async fn open_book(path: &str) -> Result<Vec<u8>, std::io::Error> {
     return fs::read(path).await;
 }
 
-async fn upsert_book(book: Book, connection: ConnectionFn) {
+async fn update_book(book: BookPatch, connection: ConnectionFn) {
+    match connection().await {
+        Ok(mut conn) => match conn.begin().await {
+            Ok(mut trx) => {
+                let result = sqlx::query(
+                    r#"
+                    UPDATE books SET
+                              title = COALESCE(?, title),
+                              path = COALESCE(?, path),
+                              language = COALESCE(?, language),
+                              last_opened = COALESCE(?, last_opened),
+                              date_added = COALESCE(?, date_added),
+                              last_page = COALESCE(?, last_page)
+                              WHERE id = ?
+                          "#,
+                )
+                .bind(&book.title)
+                .bind(&book.path)
+                .bind(&book.language)
+                .bind(&book.last_opened) // last_opened
+                .bind(&book.date_added)
+                .bind(book.last_page) // date_added
+                .bind(&book.id)
+                .execute(&mut *trx) // This is literally a programming skateboarding...
+                .await;
+                //TODO: omit in favor of ?
+                match result {
+                    Ok(_) => {
+                        if trx.commit().await.is_err() {
+                            eprintln!("Transaction commit failed");
+                        } else {
+                            println!("Updated book '{:?}' (id: {})", &book.title, book.id);
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to update book: {}", e); // TODO: Proper error handling
+                    }
+                }
+            }
+            Err(err) => {
+                eprintln!("Failed to load book: {}", err); // TODO: Proper error handling
+            }
+        },
+        Err(err) => {
+            eprintln!("Failed to establish book: {}", err); // Need to read on a custom error types or smth
+        }
+    }
+}
+
+async fn upsert_book(book: BookPatch, connection: ConnectionFn) {
     match connection().await {
         Ok(mut conn) => match conn.begin().await {
             Ok(mut trx) => {
                 let result = sqlx::query(
                     r#"
                           INSERT INTO books
-                              (id, title, path, language, last_opened, date_added)
-                          VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+                              (id, title, path, language, last_opened, date_added, last_page)
+                          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
                           ON CONFLICT(id) DO UPDATE SET
                               title = excluded.title,
                               path = excluded.path,
                               language = excluded.language,
                               last_opened = excluded.last_opened,
-                              date_added = excluded.date_added
+                              date_added = excluded.date_added,
+                              last_page = excluded.last_page
                           "#,
                 )
-                .bind(&book.content_id)
+                .bind(&book.id)
                 .bind(&book.title)
                 .bind(&book.path)
                 .bind(&book.language)
-                .bind(&book.last_opened.to_string()) // last_opened
-                .bind(&book.date_added.to_string()) // date_added
+                .bind(&book.last_opened) // last_opened
+                .bind(&book.date_added)
+                .bind(book.last_page) // date_added
                 .execute(&mut *trx) // This is literally a programming skateboarding...
                 .await;
-
+                //TODO: omit in favor of ?
                 match result {
                     Ok(_) => {
                         if trx.commit().await.is_err() {
                             eprintln!("Transaction commit failed");
                         } else {
-                            println!("Saved book '{}' (id: {})", book.title, book.content_id);
+                            println!("Saved book '{:?}' (id: {})", &book.title, book.id);
                         }
                     }
                     Err(e) => {
@@ -101,12 +192,10 @@ async fn upsert_book(book: Book, connection: ConnectionFn) {
             }
             Err(err) => {
                 eprintln!("Failed to load book: {}", err); // TODO: Proper error handling
-                return;
             }
         },
         Err(err) => {
             eprintln!("Failed to establish book: {}", err); // Need to read on a custom error types or smth
-            return;
         }
     }
 }

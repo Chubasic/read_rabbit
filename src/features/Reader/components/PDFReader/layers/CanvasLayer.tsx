@@ -35,11 +35,19 @@ export default function CanvasLayerComponent({
         const context = canvas?.getContext("2d");
         if (!canvas || !context) return;
 
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
 
+        const dpr = globalThis.devicePixelRatio || 1;
 
-        renderTask = page.render({ canvas, canvasContext: context, viewport });
+        canvas.width = Math.floor(viewport.width * dpr);
+        canvas.height = Math.floor(viewport.height * dpr);
+        // canvas.width = viewport.width;
+        // canvas.height = viewport.height;
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+
+        renderTask = page.render({
+          canvas, canvasContext: context, viewport, transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined,
+        });
         await renderTask.promise;
       } catch (e: unknown) {
         if (!(e instanceof RenderingCancelledException)) {
@@ -57,6 +65,6 @@ export default function CanvasLayerComponent({
 
   if (error) return <p class="text-red-400">{error}</p>;
   return (
-    <canvas ref={canvasRef} class="absolute top-0 left-0"/>
+    <canvas ref={canvasRef} />
   );
 }
