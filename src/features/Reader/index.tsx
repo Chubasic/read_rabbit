@@ -30,7 +30,6 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [language, setLanguage] = useState<Languages>(Languages.English)
   const [bookId, setBookId] = useState<string | null>(null)
 
-
   const onFilesSelected = useCallback(
     (filesMap: Map<string, File> | null) => {
       if (!filesMap) return;
@@ -68,9 +67,8 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
     return () => { };
   }, [filePath, file, language])
 
-  const readerStrategy = useCallback(function (fileData: File) {
+  const readerStrategy = useCallback(function (fileData: File, bookId: string) {
     if (!(fileData instanceof File)) { setFileOpenError("File data must be a File instance"); return }
-    // if (!bookId) { setFileOpenError("Error while opening the file"); return }
 
     const extension = fileData.type;
     switch (extension) {
@@ -86,7 +84,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
       default:
         setFileOpenError(`Unsupported file format: ${extension}`);
     }
-  }, [bookId])
+  }, [])
 
   return (
     <div className="w-full">
@@ -99,7 +97,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
         <p>{fileOpenError}</p>
       </ReaderToolobar>
       {children}
-      {file && readerStrategy(file)}
+      {file && bookId && readerStrategy(file, bookId)}
     </div>
   );
 };
