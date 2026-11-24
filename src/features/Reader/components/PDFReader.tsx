@@ -1,3 +1,4 @@
+GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 import { readPDF } from "../../../service/pdf.ts";
 import {
   GlobalWorkerOptions,
@@ -5,12 +6,13 @@ import {
   type PDFDocumentProxy,
   type PDFPageProxy,
 } from "pdfjs-dist";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "../../../components/Button.tsx";
 import { CanvasLayer, TextLayer } from "./PDFReader/layers/index.ts";
-GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
 import "pdfjs-dist/web/pdf_viewer.css"; // styles for .textLayer
 import useBookContext from "../hooks/useBookContext.tsx";
+import useWindowClose from "../../../hooks/useWindowClose.ts";
+import { saveLastPage } from "../api/index.ts";
 
 type PDFReaderProps = {
   file: File;
@@ -19,12 +21,13 @@ type PDFReaderProps = {
 
 export default function PDFReader({ file, bookId }: PDFReaderProps) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
-  const [prevPage, nextPage, currentPage] = useBookContext(bookId)
+  const [prevPage, nextPage, currentPage] = useBookContext(bookId);
   const [error, setError] = useState<string | null>(null);
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);
   const [clientWidth, setClientWidth] = useState<number | null>(null)
 
+  useWindowClose(async () => saveLastPage(bookId, currentPage), [currentPage])
 
   const observerRef = useRef<ResizeObserver | null>(null);
 
