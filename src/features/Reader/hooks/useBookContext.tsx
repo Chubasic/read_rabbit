@@ -3,23 +3,27 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { invoke } from "@tauri-apps/api/core";
 
 export default function useBookContext(bookId: string): [() => void, () => void, number] {
-  const [pageNum, setPageNum] = useState(1);
-  const debouncedLastPage = useDebounce(1, 10000)
+  const [pageNum, setPage] = useState(1);
+  const debouncedLastPage = useDebounce(pageNum, 10000)
+
+  useEffect(() => {
+    setPage(1)
+  }, [bookId])
 
   const prevPage = useCallback(
-    () => setPageNum(pageNum - 1),
-    [setPageNum, pageNum],
+    () => setPage(pageNum - 1),
+    [setPage, pageNum],
   );
   const nextPage = useCallback(
-    () => setPageNum(pageNum + 1),
-    [setPageNum, pageNum],
+    () => setPage(pageNum + 1),
+    [setPage, pageNum],
   );
 
   useEffect(() => {
     invoke('set_last_page', {
-      presaveBook: {
+      patch: {
         id: bookId,
-        lastPage: debouncedLastPage,
+        last_page: debouncedLastPage,
       }
     });
   }, [debouncedLastPage]);

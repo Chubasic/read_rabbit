@@ -35,7 +35,7 @@ export default function TextLayerComponent({
 
     const render = async () => {
       try {
-      const textLayerElem = textLayerRef.current
+        const textLayerElem = textLayerRef.current
         if (!textLayerElem) return;
         textLayerElem.style.width = `${viewport.width}px`;
         textLayerElem.style.height = `${viewport.height}px`;
@@ -61,6 +61,7 @@ export default function TextLayerComponent({
       if (textLayerRef.current) {
         textLayerRef.current.innerHTML = "";
       }
+      textLayer?.cancel()
     };
   }, [page, viewport, pageNum]);
 
@@ -69,7 +70,7 @@ export default function TextLayerComponent({
   return (
     <div
       ref={textLayerRef}
-      class="textLayer absolute top-0 left-0"
+      class="textLayer absolute inset-0"
     ></div>
   );
 }

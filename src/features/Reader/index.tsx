@@ -70,7 +70,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
 
   const readerStrategy = useCallback(function (fileData: File) {
     if (!(fileData instanceof File)) { setFileOpenError("File data must be a File instance"); return }
-    if (!bookId) { setFileOpenError("Error while opening the file"); return }
+    // if (!bookId) { setFileOpenError("Error while opening the file"); return }
 
     const extension = fileData.type;
     switch (extension) {

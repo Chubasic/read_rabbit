@@ -5,7 +5,7 @@ import {
   type PDFDocumentProxy,
   type PDFPageProxy,
 } from "pdfjs-dist";
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import Button from "../../../components/Button.tsx";
 import { CanvasLayer, TextLayer } from "./PDFReader/layers/index.ts";
 GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
@@ -23,7 +23,21 @@ export default function PDFReader({ file, bookId }: PDFReaderProps) {
   const [error, setError] = useState<string | null>(null);
   const [viewport, setViewport] = useState<PageViewport | null>(null);
   const [page, setPage] = useState<PDFPageProxy | null>(null);
+  const [clientWidth, setClientWidth] = useState<number | null>(null)
 
+
+  const observerRef = useRef<ResizeObserver | null>(null);
+
+  const measureRef = useCallback((el: HTMLDivElement | null) => {
+    observerRef.current?.disconnect();
+    if (!el) return;
+    setClientWidth(el.clientWidth); // initial measure
+    const ro = new ResizeObserver(([entry]) => {
+      setClientWidth(entry.contentRect.width);
+    });
+    ro.observe(el);
+    observerRef.current = ro;
+  }, []);
 
   // 1. Load the document whenever the file changes
   // Remove page/viewport load from file change effect
@@ -42,17 +56,24 @@ export default function PDFReader({ file, bookId }: PDFReaderProps) {
     load();
   }, [file]);
 
+
+
   // Load page and viewport when pdfDoc or pageNum changes
   useEffect(() => {
     if (!pdfDoc) return;
+    if (!clientWidth) return;
     let cancelled = false;
+
     const loadPage = async () => {
+
+      if (cancelled) return;
       try {
+
         const page = await pdfDoc.getPage(currentPage);
-        if (cancelled) return;
-        const viewport = page.getViewport({
-          scale: 1.5 * (globalThis.devicePixelRatio || 1),
-        });
+        const baseViewport = page.getViewport({ scale: 1 });
+        const cssScale = clientWidth / baseViewport.width;
+        const viewport = page.getViewport({ scale: cssScale });
+
         setPage(page);
         setViewport(viewport);
       } catch (e: unknown) {
@@ -63,13 +84,13 @@ export default function PDFReader({ file, bookId }: PDFReaderProps) {
     return () => {
       cancelled = true;
     };
-  }, [pdfDoc, currentPage]);
+  }, [pdfDoc, currentPage, clientWidth]);
 
   if (error) return <p class="text-red-600">{error}</p>;
   if (!pdfDoc) return <p>Loading…</p>;
 
   return (
-    <div class="flex flex-col items-center gap-2">
+    <div class="flex flex-col items-center gap-2 w-full">
       <div class="flex items-center gap-3">
         <Button disabled={currentPage <= 1} onClick={prevPage}>
           Prev
@@ -81,10 +102,18 @@ export default function PDFReader({ file, bookId }: PDFReaderProps) {
           Next
         </Button>
       </div>
-      <div class="relative" style={{ width: viewport?.width, height: viewport?.height, }}>
-        <CanvasLayer page={page} viewport={viewport} pageNum={currentPage} />
-        <TextLayer page={page} viewport={viewport} pageNum={currentPage} />
-      </div>
+      <div ref={measureRef} class="w-full">
+        <div className="relative mx-auto"
+          style={{
+            width: viewport?.width,
+            height: viewport?.height,
+            ["--user-unit" as string]: 1,
+            ["--total-scale-factor" as string]: viewport?.scale,
+
+          }}>
+          <CanvasLayer page={page} viewport={viewport} pageNum={currentPage} />
+          <TextLayer page={page} viewport={viewport} pageNum={currentPage} />
+        </div></div>
     </div>
   );
 }

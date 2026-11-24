@@ -65,7 +65,7 @@ pub async fn set_last_page(patch: BookLastPageUpdate, app: AppHandle) {
         path: None,
         language: None,
     };
-    upsert_book(book_patch, connection).await;
+    update_book(book_patch, connection).await;
 }
 
 fn hash_contents(book_bytes: &[u8]) -> Hash {
@@ -98,6 +98,55 @@ pub async fn save_book(presave_book: BookPreSave, app: AppHandle) -> Result<Book
 
 async fn open_book(path: &str) -> Result<Vec<u8>, std::io::Error> {
     return fs::read(path).await;
+}
+
+async fn update_book(book: BookPatch, connection: ConnectionFn) {
+    match connection().await {
+        Ok(mut conn) => match conn.begin().await {
+            Ok(mut trx) => {
+                let result = sqlx::query(
+                    r#"
+                    UPDATE books SET
+                              title = COALESCE(?, title),
+                              path = COALESCE(?, path),
+                              language = COALESCE(?, language),
+                              last_opened = COALESCE(?, last_opened),
+                              date_added = COALESCE(?, date_added),
+                              last_page = COALESCE(?, last_page)
+                              WHERE id = ?
+                          "#,
+                )
+                .bind(&book.title)
+                .bind(&book.path)
+                .bind(&book.language)
+                .bind(&book.last_opened) // last_opened
+                .bind(&book.date_added)
+                .bind(book.last_page) // date_added
+                .bind(&book.id)
+                .execute(&mut *trx) // This is literally a programming skateboarding...
+                .await;
+                //TODO: omit in favor of ?
+                match result {
+                    Ok(_) => {
+                        if trx.commit().await.is_err() {
+                            eprintln!("Transaction commit failed");
+                        } else {
+                            println!("Updated book '{:?}' (id: {})", &book.title, book.id);
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to update book: {}", e); // TODO: Proper error handling
+                    }
+                }
+            }
+            Err(err) => {
+                eprintln!("Failed to load book: {}", err); // TODO: Proper error handling
+            }
+        },
+        Err(err) => {
+            eprintln!("Failed to establish book: {}", err); // Need to read on a custom error types or smth
+        }
+    }
 }
 
 async fn upsert_book(book: BookPatch, connection: ConnectionFn) {
