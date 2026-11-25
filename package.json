@@ -11,6 +11,7 @@
   },
   "author": "chubasic",
   "devDependencies": {
+    "@testing-library/preact": "^3.2.6",
     "@preact/preset-vite": "^2.10.5",
     "typescript": "~6.0.3",
     "vite": "^8.0.16",

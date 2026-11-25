@@ -1,5 +1,5 @@
 import { getDocument } from "pdfjs-dist";
-import {
+import type {
   DocumentInitParameters,
   PDFDocumentProxy,
 } from "pdfjs-dist/types/src/display/api";

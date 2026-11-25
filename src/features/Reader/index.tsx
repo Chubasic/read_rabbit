@@ -1,14 +1,13 @@
+import z from 'zod';
 import { invoke } from '@tauri-apps/api/core';
 import { ComponentChildren, FunctionComponent } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { FileUploadInput } from "../../components/FileUploadInput.tsx";
 import ReaderToolobar from "./ReaderTools/ReaderToolbar.tsx";
-
 import PlusIcon from "../../components/icons/PlusIcon.tsx";
 import PDFReader from "./components/PDFReader.tsx";
 import { validateFile } from '../../utility/validateFile.ts';
 import { textFileSchema } from './validation.ts';
-import z from 'zod';
 
 type Reader = typeof PDFReader | any;
 

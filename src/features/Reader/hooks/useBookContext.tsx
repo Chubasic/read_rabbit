@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
-import { useDebounce } from "../../../hooks/useDebounce";
-import { saveLastPage } from "../api";
+import { useDebounce } from "../../../hooks/useDebounce.ts";
+import { saveLastPage } from "../api/index.ts";
 
 export default function useBookContext(bookId: string): [() => void, () => void, number] {
   const [currentPage, setPage] = useState(1);

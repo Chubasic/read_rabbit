@@ -9,7 +9,6 @@ import {
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "../../../components/Button.tsx";
 import { CanvasLayer, TextLayer } from "./PDFReader/layers/index.ts";
-import "pdfjs-dist/web/pdf_viewer.css"; // styles for .textLayer
 import useBookContext from "../hooks/useBookContext.tsx";
 import useWindowClose from "../../../hooks/useWindowClose.ts";
 import { saveLastPage } from "../api/index.ts";
@@ -58,8 +57,6 @@ export default function PDFReader({ file, bookId }: PDFReaderProps) {
     };
     load();
   }, [file]);
-
-
 
   // Load page and viewport when pdfDoc or pageNum changes
   useEffect(() => {
