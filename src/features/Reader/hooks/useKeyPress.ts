@@ -1,6 +1,6 @@
 import { useEffect } from 'preact/hooks';
 
-export function useKeyPress(
+export default function useKeyPress(
   key: string,
   callback: (event: KeyboardEvent) => void
 ) {

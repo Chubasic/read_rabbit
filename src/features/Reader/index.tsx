@@ -7,6 +7,7 @@ import ReaderToolobar from "./ReaderTools/ReaderToolbar.tsx";
 import PlusIcon from "../../components/icons/PlusIcon.tsx";
 import PDFReader from "./components/PDFReader.tsx";
 import ReaderControls from "./components/ReaderControls.tsx";
+import { BookProvider } from "./context/BookContext.tsx";
 import { validateFile } from '../../utility/validateFile.ts';
 import { textFileSchema } from './validation.ts';
 
@@ -68,13 +69,13 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
     return () => { };
   }, [filePath, file, language])
 
-  const readerStrategy = useCallback(function (fileData: File, bookId: string) {
+  const readerStrategy = useCallback(function (fileData: File) {
     if (!(fileData instanceof File)) { setFileOpenError("File data must be a File instance"); return }
 
     const extension = fileData.type;
     switch (extension) {
       case "pdf": {
-        return <PDFReader file={fileData} bookId={bookId} />;
+        return <PDFReader file={fileData} />;
       }
       case "fb2":
         setFileOpenError("Handling FB2 file has not been implemented");
@@ -99,9 +100,11 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
       </ReaderToolobar>
       {children}
       {file && bookId && (
-        <ReaderControls bookId={bookId}>
-          {readerStrategy(file, bookId)}
-        </ReaderControls>
+        <BookProvider bookId={bookId}>
+          <ReaderControls>
+            {readerStrategy(file)}
+          </ReaderControls>
+        </BookProvider>
       )}
     </div>
   );

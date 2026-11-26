@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks"
 
 
-export function useDebounce<V>(value: V, time: number): V {
+export default function useDebounce<V>(value: V, time: number): V {
   const [debounced, setDebounced] = useState(value)
 
   useEffect(() => {

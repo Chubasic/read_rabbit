@@ -1,25 +1,32 @@
-import { useBookContext } from '../hooks/useBookContext';
-import { useKeyPress } from '../hooks/useKeyPress';
-import useWindowClose from '../../../hooks/useWindowClose';
-import { saveLastPage } from '../api';
+import type { ComponentChildren } from "preact";
+import { useBookContext } from '../context/BookContext';
+import useKeyPress from '../hooks/useKeyPress.ts';
+import Button from "../../../components/Button.tsx";
 
 type ReaderControlsProps = {
-  bookId: string;
-  children: React.ReactNode;
+  children: ComponentChildren;
 };
 
-export default function ReaderControls({ bookId, children }: ReaderControlsProps) {
-  const [prevPage, nextPage, currentPage] = useBookContext(bookId);
+export default function ReaderControls({ children }: ReaderControlsProps) {
+  const { currentPage, totalPages, prevPage, nextPage } = useBookContext();
 
-  // Keyboard navigation
   useKeyPress('ArrowRight', nextPage);
   useKeyPress('ArrowLeft', prevPage);
 
-  // Save last page on window close
-  useWindowClose(
-    async () => saveLastPage(bookId, currentPage),
-    [bookId, currentPage]
+  return (
+    <div class="flex flex-col items-center gap-2 w-full">
+      <div class="flex items-center gap-3">
+        <Button disabled={currentPage <= 1} onClick={prevPage}>
+          Prev
+        </Button>
+        <span>
+          {currentPage} / {totalPages}
+        </span>
+        <Button disabled={currentPage >= totalPages} onClick={nextPage}>
+          Next
+        </Button>
+      </div>
+      <>{children}</>
+    </div>
   );
-
-  return <>{children}</>;
 }
