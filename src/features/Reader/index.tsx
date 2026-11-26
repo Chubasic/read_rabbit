@@ -6,6 +6,7 @@ import { FileUploadInput } from "../../components/FileUploadInput.tsx";
 import ReaderToolobar from "./ReaderTools/ReaderToolbar.tsx";
 import PlusIcon from "../../components/icons/PlusIcon.tsx";
 import PDFReader from "./components/PDFReader.tsx";
+import ReaderControls from "./components/ReaderControls.tsx";
 import { validateFile } from '../../utility/validateFile.ts';
 import { textFileSchema } from './validation.ts';
 
@@ -28,6 +29,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [filePath, setFilePath] = useState<string | null>(null)
   const [language, setLanguage] = useState<Languages>(Languages.English)
   const [bookId, setBookId] = useState<string | null>(null)
+
 
   const onFilesSelected = useCallback(
     (filesMap: Map<string, File> | null) => {
@@ -78,7 +80,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
         setFileOpenError("Handling FB2 file has not been implemented");
         return null;
       case "epub":
-        setFileOpenError("Handling EBUP file has not been implemented");
+        setFileOpenError("Handling EPUB file has not been implemented");
         return null;
       default:
         setFileOpenError(`Unsupported file format: ${extension}`);
@@ -96,7 +98,11 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
         <p>{fileOpenError}</p>
       </ReaderToolobar>
       {children}
-      {file && bookId && readerStrategy(file, bookId)}
+      {file && bookId && (
+        <ReaderControls bookId={bookId}>
+          {readerStrategy(file, bookId)}
+        </ReaderControls>
+      )}
     </div>
   );
 };

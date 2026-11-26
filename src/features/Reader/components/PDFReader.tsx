@@ -9,9 +9,8 @@ import {
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import Button from "../../../components/Button.tsx";
 import { CanvasLayer, TextLayer } from "./PDFReader/layers/index.ts";
-import useBookContext from "../hooks/useBookContext.tsx";
-import useWindowClose from "../../../hooks/useWindowClose.ts";
-import { saveLastPage } from "../api/index.ts";
+import useBookContext from "../hooks/useBookContext.ts";
+import ReaderControls from "./ReaderControls.tsx";
 
 type PDFReaderProps = {
   file: File;
@@ -21,12 +20,12 @@ type PDFReaderProps = {
 export default function PDFReader({ file, bookId }: PDFReaderProps) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
   const [prevPage, nextPage, currentPage] = useBookContext(bookId);
+
   const [error, setError] = useState<string | null>(null);
   const [viewport, setViewport] = useState<PageViewport | null>(null);
-  const [page, setPage] = useState<PDFPageProxy | null>(null);
   const [clientWidth, setClientWidth] = useState<number | null>(null)
 
-  useWindowClose(async () => saveLastPage(bookId, currentPage), [currentPage])
+  const [page, setPage] = useState<PDFPageProxy | null>(null);
 
   const observerRef = useRef<ResizeObserver | null>(null);
 
@@ -90,39 +89,33 @@ export default function PDFReader({ file, bookId }: PDFReaderProps) {
   if (!pdfDoc) return <p>Loading…</p>;
 
   return (
-    <div class="flex flex-col items-center gap-2 w-full">
-      <div class="flex items-center gap-3">
-        <Button disabled={currentPage <= 1} onClick={prevPage}>
-          Prev
-        </Button>
-        <span>
-          {currentPage} / {pdfDoc.numPages}
-        </span>
-        <Button disabled={currentPage >= pdfDoc.numPages} onClick={nextPage}>
-          Next
-        </Button>
-      </div>
-      <div ref={measureRef} class="w-full">
-        <div className="relative mx-auto"
-          style={{
-            width: viewport?.width,
-            height: viewport?.height,
-            ["--user-unit" as string]: 1,
-            ["--total-scale-factor" as string]: viewport?.scale,
+    <ReaderControls bookId={bookId}>
+      <div class="flex flex-col items-center gap-2 w-full">
+        <div class="flex items-center gap-3">
+          <Button disabled={currentPage <= 1} onClick={prevPage}>
+            Prev
+          </Button>
+          <span>
+            {currentPage} / {pdfDoc.numPages}
+          </span>
+          <Button disabled={currentPage >= pdfDoc.numPages} onClick={nextPage}>
+            Next
+          </Button>
+        </div>
+        <div ref={measureRef} class="w-full">
+          <div className="relative mx-auto"
+            style={{
+              width: viewport?.width,
+              height: viewport?.height,
+              ["--user-unit" as string]: 1,
+              ["--total-scale-factor" as string]: viewport?.scale,
 
-          }}>
-          <CanvasLayer page={page} viewport={viewport} pageNum={currentPage} />
-          <TextLayer page={page} viewport={viewport} pageNum={currentPage} />
-        </div></div>
-    </div>
+            }}>
+            <CanvasLayer page={page} viewport={viewport} pageNum={currentPage} />
+            <TextLayer page={page} viewport={viewport} pageNum={currentPage} />
+          </div>
+        </div>
+      </div>
+    </ReaderControls>
   );
 }
-/*
-<div class="pdf-layers" style={{ ... }} >
-  <div class="pdf-layer__canvas">
-     <canvas ref={canvasLayer} />
-  </div>
-  <div ref={textLayer} class="pdf-layer__text" />
-  <div ref={annotationLayer} class="pdf-layer__annotation" />
-</div>
-*/
