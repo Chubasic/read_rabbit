@@ -1,14 +1,15 @@
+import z from 'zod';
 import { invoke } from '@tauri-apps/api/core';
 import { ComponentChildren, FunctionComponent } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { FileUploadInput } from "../../components/FileUploadInput.tsx";
 import ReaderToolobar from "./ReaderTools/ReaderToolbar.tsx";
-
 import PlusIcon from "../../components/icons/PlusIcon.tsx";
 import PDFReader from "./components/PDFReader.tsx";
+import ReaderControls from "./components/ReaderControls.tsx";
+import { BookProvider } from "./context/BookContext.tsx";
 import { validateFile } from '../../utility/validateFile.ts';
 import { textFileSchema } from './validation.ts';
-import z from 'zod';
 
 type Reader = typeof PDFReader | any;
 
@@ -29,6 +30,7 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
   const [filePath, setFilePath] = useState<string | null>(null)
   const [language, setLanguage] = useState<Languages>(Languages.English)
   const [bookId, setBookId] = useState<string | null>(null)
+
 
   const onFilesSelected = useCallback(
     (filesMap: Map<string, File> | null) => {
@@ -67,19 +69,19 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
     return () => { };
   }, [filePath, file, language])
 
-  const readerStrategy = useCallback(function (fileData: File, bookId: string) {
+  const readerStrategy = useCallback(function (fileData: File) {
     if (!(fileData instanceof File)) { setFileOpenError("File data must be a File instance"); return }
 
     const extension = fileData.type;
     switch (extension) {
       case "pdf": {
-        return <PDFReader file={fileData} bookId={bookId} />;
+        return <PDFReader file={fileData} />;
       }
       case "fb2":
         setFileOpenError("Handling FB2 file has not been implemented");
         return null;
       case "epub":
-        setFileOpenError("Handling EBUP file has not been implemented");
+        setFileOpenError("Handling EPUB file has not been implemented");
         return null;
       default:
         setFileOpenError(`Unsupported file format: ${extension}`);
@@ -97,7 +99,13 @@ const Reader: FunctionComponent<Props> = ({ children }: Props) => {
         <p>{fileOpenError}</p>
       </ReaderToolobar>
       {children}
-      {file && bookId && readerStrategy(file, bookId)}
+      {file && bookId && (
+        <BookProvider bookId={bookId}>
+          <ReaderControls>
+            {readerStrategy(file)}
+          </ReaderControls>
+        </BookProvider>
+      )}
     </div>
   );
 };

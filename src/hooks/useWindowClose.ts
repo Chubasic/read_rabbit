@@ -13,7 +13,6 @@ export default function (onCloseCb: () => Promise<void> | void, inputs: any[]) {
       if (shouldClose) {
         await onCloseCb();
         await appWindow.destroy(); // bypasses CloseRequested
-        // await appWindow.close();
       }
     });
     const unlistenFuture = listen();
